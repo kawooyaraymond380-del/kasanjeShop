@@ -1,5 +1,5 @@
 
-import { collection, getDocs, query, limit, orderBy, writeBatch, doc } from "firebase/firestore";
+import { collection, getDocs, query, limit, orderBy, writeBatch, doc, where, QueryConstraint } from "firebase/firestore";
 import { db } from "./firebase";
 
 export interface Product {
@@ -17,6 +17,7 @@ export interface Product {
   sellerId?: string;
   sellerName?: string;
   createdAt?: Date;
+  featured?: boolean;
 }
 
 export interface Category {
@@ -37,55 +38,75 @@ export interface Testimonial {
   rating: number;
 }
 
-// Fetches featured products from Firestore
-export async function getFeaturedProducts(): Promise<Product[]> {
-  try {
-    const productsRef = collection(db, "products");
-    // Example: fetch 8 most recent products. You can change the query as needed.
-    const q = query(productsRef, orderBy("createdAt", "desc"), limit(8));
-    const querySnapshot = await getDocs(q);
-    
-    const products = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      // A default product structure to ensure type safety
-      const defaultProduct: Product = {
-        id: doc.id,
-        name: 'Unnamed Product',
-        price: 0,
-        image: 'https://source.unsplash.com/featured/?product',
-        imageHint: 'product',
-        description: 'No description available.',
-        rating: 0,
-        reviews: 0,
-        details: [],
-        category: 'Uncategorized',
-        thumbnails: [],
-        createdAt: new Date(),
-      };
-
-      // Firestore timestamps need to be converted to JS Date objects
-      const productData = {
-        ...defaultProduct,
-        ...data,
-        id: doc.id,
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-        // Ensure required fields have defaults
-        thumbnails: data.thumbnails || [{ url: data.image || 'https://source.unsplash.com/featured/?product,thumbnail', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,2', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,3', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,4', hint: 'product' }],
-        details: data.details || [
-            'No details provided.',
-            'Contact seller for more information.'
-        ]
-      };
-      
-      return productData as Product;
-    });
-
-    return products;
-  } catch (error) {
-    console.error("Error fetching featured products: ", error);
-    return []; // Return an empty array on error
-  }
+interface GetProductsOptions {
+    category?: string;
+    featured?: boolean;
+    limit?: number;
 }
+
+// Generic function to fetch products with different filters
+export async function getProducts(options: GetProductsOptions = {}): Promise<Product[]> {
+    try {
+        const productsRef = collection(db, "products");
+        const constraints: QueryConstraint[] = [];
+
+        if (options.category) {
+            constraints.push(where("category", "==", options.category));
+        }
+        if (options.featured) {
+            constraints.push(where("featured", "==", true));
+        }
+        constraints.push(orderBy("createdAt", "desc"));
+        if (options.limit) {
+            constraints.push(limit(options.limit));
+        }
+        
+        const q = query(productsRef, ...constraints);
+        const querySnapshot = await getDocs(q);
+        
+        const products = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const defaultProduct: Product = {
+                id: doc.id,
+                name: 'Unnamed Product',
+                price: 0,
+                image: 'https://source.unsplash.com/featured/?product',
+                imageHint: 'product',
+                description: 'No description available.',
+                rating: 0,
+                reviews: 0,
+                details: [],
+                category: 'Uncategorized',
+                thumbnails: [],
+                createdAt: new Date(),
+            };
+
+            const productData = {
+                ...defaultProduct,
+                ...data,
+                id: doc.id,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+                thumbnails: data.thumbnails || [
+                    { url: data.image || 'https://source.unsplash.com/featured/?product,thumbnail', hint: 'product' },
+                    { url: 'https://source.unsplash.com/featured/?product,thumbnail,2', hint: 'product' },
+                    { url: 'https://source.unsplash.com/featured/?product,thumbnail,3', hint: 'product' },
+                    { url: 'https://source.unsplash.com/featured/?product,thumbnail,4', hint: 'product' }
+                ],
+                details: data.details || [
+                    'No details provided.',
+                    'Contact seller for more information.'
+                ]
+            };
+            return productData as Product;
+        });
+
+        return products;
+    } catch (error) {
+        console.error("Error fetching products: ", error);
+        return [];
+    }
+}
+
 
 export async function getCategoriesFromDB(): Promise<Category[]> {
     const categoriesRef = collection(db, "categories");
@@ -176,3 +197,5 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
   console.log("getProductById needs to be implemented to fetch from Firestore.");
   return undefined;
 }
+
+export { getFeaturedProducts } from './data-legacy';

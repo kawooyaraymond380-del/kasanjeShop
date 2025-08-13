@@ -3,11 +3,13 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Star } from 'lucide-react';
-import { getCategoriesFromDB, getFeaturedProducts, getTestimonialsFromDB, Product, Category, Testimonial } from '@/lib/data';
+import { getCategoriesFromDB, getProducts, Testimonial, Category } from '@/lib/data';
 import { ProductGrid } from '@/components/product-grid';
 import { AiRecommendations } from '@/components/ai-recommendations';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
+import { getTestimonialsFromDB } from '@/lib/data';
 
 function HeroSection() {
   return (
@@ -30,8 +32,12 @@ function HeroSection() {
           Supporting local sellers and artisans in Kasanje and beyond
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="rounded-full text-lg px-8 py-6">Shop Now</Button>
-          <Button size="lg" variant="secondary" className="rounded-full text-lg px-8 py-6">Become a Seller</Button>
+          <Button size="lg" className="rounded-full text-lg px-8 py-6" asChild>
+            <Link href="/products">Shop Now</Link>
+          </Button>
+          <Button size="lg" variant="secondary" className="rounded-full text-lg px-8 py-6" asChild>
+            <Link href="/sell">Become a Seller</Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -51,16 +57,18 @@ async function CategoriesSection() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {categories.map((category) => (
-            <Card key={category.name} className="category-card overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="h-48 overflow-hidden relative">
-                <Image src={category.image} alt={category.name} fill className="object-cover" data-ai-hint={category.imageHint} />
-              </div>
-              <CardContent className="p-4 text-center">
-                <h3 className="font-bold text-lg mb-1">{category.name}</h3>
-                <p className="text-sm text-muted-foreground">{category.description}</p>
-                <Button variant="link" className="mt-3 text-primary">Browse Products</Button>
-              </CardContent>
-            </Card>
+            <Link key={category.id || category.name} href={`/category/${encodeURIComponent(category.name)}`} className="group">
+              <Card className="category-card h-full overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
+                <div className="h-48 overflow-hidden relative">
+                  <Image src={category.image} alt={category.name} fill className="object-cover" data-ai-hint={category.imageHint} />
+                </div>
+                <CardContent className="p-4 text-center flex flex-col items-center">
+                  <h3 className="font-bold text-lg mb-1">{category.name}</h3>
+                  <p className="text-sm text-muted-foreground flex-grow">{category.description}</p>
+                  <Button variant="link" className="mt-3 text-primary">Browse Products</Button>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
@@ -69,7 +77,7 @@ async function CategoriesSection() {
 }
 
 async function FeaturedProductsSection() {
-  const products = await getFeaturedProducts();
+  const products = await getProducts({ featured: true });
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
@@ -84,9 +92,11 @@ async function FeaturedProductsSection() {
           <AiRecommendations />
         </div>
         <div className="text-center mt-12">
-          <Button size="lg" variant="secondary" className="rounded-full">
-            View All Products
-            <ArrowRight className="ml-2 h-5 w-5" />
+          <Button size="lg" variant="secondary" className="rounded-full" asChild>
+            <Link href="/products">
+              View All Products
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
           </Button>
         </div>
       </div>
@@ -130,7 +140,7 @@ function CommunityBanner() {
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90 rounded-full">Learn More</Button>
-          <Button size="lg" variant="secondary" className="rounded-full">Start Selling</Button>
+          <Button size="lg" variant="secondary" className="rounded-full" asChild><Link href="/sell">Start Selling</Link></Button>
         </div>
       </div>
     </section>
