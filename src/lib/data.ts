@@ -1,5 +1,8 @@
+import { collection, getDocs, query, limit, orderBy } from "firebase/firestore";
+import { db } from "./firebase";
+
 export interface Product {
-  id: number;
+  id: string; // Changed to string to support Firestore IDs
   name: string;
   price: number;
   image: string;
@@ -10,6 +13,9 @@ export interface Product {
   details: string[];
   category: string;
   thumbnails: { url: string, hint: string }[];
+  sellerId?: string;
+  sellerName?: string;
+  createdAt?: Date;
 }
 
 export interface Category {
@@ -27,101 +33,6 @@ export interface Testimonial {
   imageHint: string;
   rating: number;
 }
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Handcrafted Clay Pot",
-    price: 1200,
-    image: "https://placehold.co/600x600.png",
-    imageHint: "clay pot",
-    description: "Traditional hand-painted pottery",
-    rating: 4,
-    reviews: 24,
-    category: "Handmade Crafts",
-    details: [
-      "Handmade in Kasanje",
-      "Materials: Natural clay with non-toxic glaze",
-      "Dimensions: Approximately 20cm height, 15cm diameter",
-      "Care instructions: Hand wash recommended",
-    ],
-    thumbnails: [
-        { url: 'https://placehold.co/200x200.png', hint: 'pottery detail' },
-        { url: 'https://placehold.co/200x200.png', hint: 'pottery angle' },
-        { url: 'https://placehold.co/200x200.png', hint: 'person pottery' },
-        { url: 'https://placehold.co/200x200.png', hint: 'pottery making' }
-    ]
-  },
-  {
-    id: 2,
-    name: "Organic Apple Basket",
-    price: 450,
-    image: "https://placehold.co/600x600.png",
-    imageHint: "apple basket",
-    description: "Fresh local farm apples (1kg)",
-    rating: 4.5,
-    reviews: 32,
-    category: "Fresh Produce",
-    details: [
-        "Locally sourced from Kasanje farms",
-        "Certified organic",
-        "Weight: 1kg per basket",
-        "Best consumed within a week",
-    ],
-    thumbnails: [
-        { url: 'https://placehold.co/200x200.png', hint: 'red apples' },
-        { url: 'https://placehold.co/200x200.png', hint: 'apple tree' },
-        { url: 'https://placehold.co/200x200.png', hint: 'farmer apples' },
-        { url: 'https://placehold.co/200x200.png', hint: 'basket apples' }
-    ]
-  },
-  {
-    id: 3,
-    name: "Beaded Necklace",
-    price: 850,
-    image: "https://placehold.co/600x600.png",
-    imageHint: "beaded necklace",
-    description: "Handmade traditional jewelry",
-    rating: 5,
-    reviews: 18,
-    category: "Clothing & Accessories",
-    details: [
-        "Handcrafted by local artisans",
-        "Materials: Glass beads, durable string",
-        "Length: 45cm",
-        "Features a unique, traditional pattern",
-    ],
-    thumbnails: [
-        { url: 'https://placehold.co/200x200.png', hint: 'colorful beads' },
-        { url: 'https://placehold.co/200x200.png', hint: 'woman necklace' },
-        { url: 'https://placehold.co/200x200.png', hint: 'necklace clasp' },
-        { url: 'https://placehold.co/200x200.png', hint: 'artisan making jewelry' }
-    ]
-  },
-  {
-    id: 4,
-    name: "African Print Bag",
-    price: 1500,
-    image: "https://placehold.co/600x600.png",
-    imageHint: "print bag",
-    description: "Stylish handmade tote bag",
-    rating: 4,
-    reviews: 12,
-    category: "Clothing & Accessories",
-    details: [
-        "Made with authentic African print fabric",
-        "Spacious interior with a small pocket",
-        "Durable leather straps",
-        "Ideal for daily use or as a statement piece",
-    ],
-    thumbnails: [
-        { url: 'https://placehold.co/200x200.png', hint: 'fabric pattern' },
-        { url: 'https://placehold.co/200x200.png', hint: 'bag interior' },
-        { url: 'https://placehold.co/200x200.png', hint: 'model with bag' },
-        { url: 'https://placehold.co/200x200.png', hint: 'bag detail' }
-    ]
-  },
-];
 
 const categories: Category[] = [
   {
@@ -183,12 +94,61 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-export const getFeaturedProducts = (): Product[] => {
-  return products;
+// Fetches featured products from Firestore
+export async function getFeaturedProducts(): Promise<Product[]> {
+  try {
+    const productsRef = collection(db, "products");
+    // Example: fetch 8 most recent products. You can change the query as needed.
+    const q = query(productsRef, orderBy("createdAt", "desc"), limit(8));
+    const querySnapshot = await getDocs(q);
+    
+    const products = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      // A default product structure to ensure type safety
+      const defaultProduct: Product = {
+        id: doc.id,
+        name: 'Unnamed Product',
+        price: 0,
+        image: 'https://placehold.co/600x600.png',
+        imageHint: 'product',
+        description: 'No description available.',
+        rating: 0,
+        reviews: 0,
+        details: [],
+        category: 'Uncategorized',
+        thumbnails: [],
+        createdAt: new Date(),
+      };
+
+      // Firestore timestamps need to be converted to JS Date objects
+      const productData = {
+        ...defaultProduct,
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+        // Ensure required fields have defaults
+        thumbnails: data.thumbnails || [{ url: data.image || 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }],
+        details: data.details || [
+            'No details provided.',
+            'Contact seller for more information.'
+        ]
+      };
+      
+      return productData as Product;
+    });
+
+    return products;
+  } catch (error) {
+    console.error("Error fetching featured products: ", error);
+    return []; // Return an empty array on error
+  }
 }
 
-export const getProductById = (id: number): Product | undefined => {
-  return products.find(p => p.id === id);
+
+export const getProductById = async (id: string): Promise<Product | undefined> => {
+  // This function would need to be updated to fetch a single product from Firestore
+  console.log("getProductById needs to be implemented to fetch from Firestore.");
+  return undefined;
 }
 
 export const getCategories = (): Category[] => {

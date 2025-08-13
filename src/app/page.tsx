@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,6 +6,8 @@ import { ArrowRight, Star } from 'lucide-react';
 import { getCategories, getFeaturedProducts, getTestimonials, Product } from '@/lib/data';
 import { ProductGrid } from '@/components/product-grid';
 import { AiRecommendations } from '@/components/ai-recommendations';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function HeroSection() {
   return (
@@ -65,7 +68,8 @@ function CategoriesSection() {
   );
 }
 
-function FeaturedProductsSection({ products }: { products: Product[] }) {
+async function FeaturedProductsSection() {
+  const products = await getFeaturedProducts();
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
@@ -88,6 +92,30 @@ function FeaturedProductsSection({ products }: { products: Product[] }) {
       </div>
     </section>
   );
+}
+
+function FeaturedProductsSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <Skeleton className="h-8 w-64 mx-auto mb-4" />
+        <Skeleton className="h-4 w-96 mx-auto" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <Skeleton className="h-64" />
+            <CardContent className="p-4">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-1/2 mb-3" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function CommunityBanner() {
@@ -147,12 +175,13 @@ function TestimonialsSection() {
 }
 
 export default function Home() {
-  const featuredProducts = getFeaturedProducts();
   return (
     <>
       <HeroSection />
       <CategoriesSection />
-      <FeaturedProductsSection products={featuredProducts} />
+      <Suspense fallback={<FeaturedProductsSkeleton />}>
+        <FeaturedProductsSection />
+      </Suspense>
       <CommunityBanner />
       <TestimonialsSection />
     </>
