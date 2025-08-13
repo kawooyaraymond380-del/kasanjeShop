@@ -1,6 +1,3 @@
-
-'use server';
-
 /**
  * @fileOverview A product recommendation AI agent.
  *

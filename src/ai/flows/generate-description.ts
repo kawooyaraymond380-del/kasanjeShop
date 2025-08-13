@@ -1,6 +1,3 @@
-
-'use server';
-
 /**
  * @fileOverview An AI flow to generate product descriptions.
  *
