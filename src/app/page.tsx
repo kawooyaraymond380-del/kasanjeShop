@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Star } from 'lucide-react';
-import { getCategories, getFeaturedProducts, getTestimonials, Product } from '@/lib/data';
+import { getCategoriesFromDB, getFeaturedProducts, getTestimonialsFromDB, Product, Category, Testimonial } from '@/lib/data';
 import { ProductGrid } from '@/components/product-grid';
 import { AiRecommendations } from '@/components/ai-recommendations';
 import { Suspense } from 'react';
@@ -38,8 +38,8 @@ function HeroSection() {
   );
 }
 
-function CategoriesSection() {
-  const categories = getCategories();
+async function CategoriesSection() {
+  const categories = await getCategoriesFromDB();
   return (
     <section className="py-16 bg-card">
       <div className="container mx-auto px-4">
@@ -137,8 +137,8 @@ function CommunityBanner() {
   );
 }
 
-function TestimonialsSection() {
-  const testimonials = getTestimonials();
+async function TestimonialsSection() {
+  const testimonials = await getTestimonialsFromDB();
   return (
     <section className="py-16 bg-card">
       <div className="container mx-auto px-4">
@@ -174,16 +174,76 @@ function TestimonialsSection() {
   );
 }
 
+function CategoriesSkeleton() {
+  return (
+    <section className="py-16 bg-card">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-12">
+        <Skeleton className="h-8 w-64 mx-auto mb-4" />
+        <Skeleton className="h-4 w-96 mx-auto" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {[...Array(5)].map((_, i) => (
+           <Card key={i} className="overflow-hidden">
+             <Skeleton className="h-48" />
+             <CardContent className="p-4 text-center">
+               <Skeleton className="h-6 w-3/4 mx-auto mb-2" />
+               <Skeleton className="h-4 w-full mx-auto mb-3" />
+               <Skeleton className="h-8 w-24 mx-auto" />
+             </CardContent>
+           </Card>
+        ))}
+      </div>
+    </div>
+  </section>
+  )
+}
+
+function TestimonialsSkeleton() {
+  return (
+    <section className="py-16 bg-card">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-12">
+        <Skeleton className="h-8 w-64 mx-auto mb-4" />
+        <Skeleton className="h-4 w-96 mx-auto" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="bg-background p-6">
+            <Skeleton className="h-5 w-24 mb-4" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4 mb-4" />
+            <div className="flex items-center">
+              <Skeleton className="w-12 h-12 rounded-full mr-4" />
+              <div>
+                <Skeleton className="h-5 w-28 mb-1" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </section>
+  )
+}
+
+
 export default function Home() {
   return (
     <>
       <HeroSection />
-      <CategoriesSection />
+      <Suspense fallback={<CategoriesSkeleton />}>
+        <CategoriesSection />
+      </Suspense>
       <Suspense fallback={<FeaturedProductsSkeleton />}>
         <FeaturedProductsSection />
       </Suspense>
       <CommunityBanner />
-      <TestimonialsSection />
+      <Suspense fallback={<TestimonialsSkeleton />}>
+        <TestimonialsSection />
+      </Suspense>
     </>
   );
 }

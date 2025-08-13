@@ -1,3 +1,4 @@
+
 import { Button } from './ui/button';
 import { Leaf, Mail, MapPin, Phone } from 'lucide-react';
 
@@ -61,7 +62,7 @@ export function SiteFooter() {
               </li>
               <li className="flex items-center">
                 <Phone className="mr-3 h-5 w-5 shrink-0 text-secondary" />
-                <span>+254 712 345 678</span>
+                <span>+256708390617</span>
               </li>
               <li className="flex items-center">
                 <Mail className="mr-3 h-5 w-5 shrink-0 text-secondary" />
