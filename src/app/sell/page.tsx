@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { addDoc, collection } from 'firebase/firestore';
-import { db, storage, auth } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ const formSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
-  image: z.instanceof(File).refine(file => file.size > 0, 'Product image is required.'),
+  image: z.instanceof(File).optional(), // Make image optional for now
 });
 
 type SellFormValues = z.infer<typeof formSchema>;
@@ -68,7 +67,6 @@ export default function SellPage() {
       description: '',
       price: 0,
       category: '',
-      image: new File([], ''),
     },
   });
 
@@ -110,11 +108,9 @@ export default function SellPage() {
     setIsSubmitting(true);
     
     try {
-      const imageFile = values.image;
-      const storageRef = ref(storage, `products/${user.uid}/${Date.now()}-${imageFile.name}`);
-      
-      const snapshot = await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(snapshot.ref);
+      // Use a placeholder image instead of uploading to Firebase Storage
+      const imageUrl = `https://placehold.co/600x400.png`;
+      const imageHint = `${values.category.toLowerCase()} product`;
 
       await addDoc(collection(db, 'products'), {
         name: values.name,
@@ -122,17 +118,18 @@ export default function SellPage() {
         price: values.price,
         category: values.category,
         image: imageUrl,
+        imageHint: imageHint,
         sellerId: user.uid,
         sellerName: user.displayName || 'Anonymous',
         createdAt: new Date(),
         rating: 0,
         reviews: 0,
-        featured: false, // Ensure new products are not featured by default
+        featured: false,
       });
 
       toast({
         title: 'Product Listed!',
-        description: 'Your product is now live on the marketplace.',
+        description: 'Your product is now live on the marketplace with a placeholder image.',
       });
 
       router.push('/dashboard');
