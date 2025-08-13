@@ -52,7 +52,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
         id: doc.id,
         name: 'Unnamed Product',
         price: 0,
-        image: 'https://placehold.co/600x600.png',
+        image: 'https://source.unsplash.com/featured/?product',
         imageHint: 'product',
         description: 'No description available.',
         rating: 0,
@@ -70,7 +70,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
         id: doc.id,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
         // Ensure required fields have defaults
-        thumbnails: data.thumbnails || [{ url: data.image || 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }, { url: 'https://placehold.co/200x200.png', hint: 'product' }],
+        thumbnails: data.thumbnails || [{ url: data.image || 'https://source.unsplash.com/featured/?product,thumbnail', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,2', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,3', hint: 'product' }, { url: 'https://source.unsplash.com/featured/?product,thumbnail,4', hint: 'product' }],
         details: data.details || [
             'No details provided.',
             'Contact seller for more information.'
@@ -127,11 +127,11 @@ export async function getTestimonialsFromDB(): Promise<Testimonial[]> {
 
 async function seedCategories() {
     const categories: Omit<Category, 'id'>[] = [
-        { name: "Handmade Crafts", description: "Unique artisan creations", image: "https://placehold.co/400x400.png", imageHint: "handmade crafts" },
-        { name: "Fresh Produce", description: "Farm-fresh fruits and vegetables", image: "https://placehold.co/400x400.png", imageHint: "fresh vegetables" },
-        { name: "Art & Prints", description: "Local artwork and designs", image: "https://placehold.co/400x400.png", imageHint: "art prints" },
-        { name: "Clothing & Accessories", description: "Handcrafted wearable items", image: "https://placehold.co/400x400.png", imageHint: "clothing accessories" },
-        { name: "Workshops & Services", description: "Local skills and services", image: "https://placehold.co/400x400.png", imageHint: "people workshop" },
+        { name: "Handmade Crafts", description: "Unique artisan creations", image: "https://source.unsplash.com/featured/?handmade,crafts", imageHint: "handmade crafts" },
+        { name: "Fresh Produce", description: "Farm-fresh fruits and vegetables", image: "https://source.unsplash.com/featured/?fresh,vegetables", imageHint: "fresh vegetables" },
+        { name: "Art & Prints", description: "Local artwork and designs", image: "https://source.unsplash.com/featured/?art,prints", imageHint: "art prints" },
+        { name: "Clothing & Accessories", description: "Handcrafted wearable items", image: "https://source.unsplash.com/featured/?clothing,accessories", imageHint: "clothing accessories" },
+        { name: "Workshops & Services", description: "Local skills and services", image: "https://source.unsplash.com/featured/?people,workshop", imageHint: "people workshop" },
     ];
     try {
         const batch = writeBatch(db);
@@ -151,9 +151,9 @@ async function seedCategories() {
 
 async function seedTestimonials() {
     const testimonials: Omit<Testimonial, 'id'>[] = [
-        { name: "Sarah Njeri", title: "Customer", quote: "Kasanje.shop has connected me with amazing local artisans. I love supporting my community while finding unique products that I can't get anywhere else.", image: "https://placehold.co/100x100.png", imageHint: "woman smiling" },
-        { name: "Mary Wambui", title: "Vendor - Handcrafts", quote: "As a seller, this marketplace has helped me reach customers I never could before. The platform is easy to use and the community support is incredible.", image: "https://placehold.co/100x100.png", imageHint: "woman portrait" },
-        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://placehold.co/100x100.png", imageHint: "man smiling" },
+        { name: "Sarah Njeri", title: "Customer", quote: "Kasanje.shop has connected me with amazing local artisans. I love supporting my community while finding unique products that I can't get anywhere else.", image: "https://source.unsplash.com/featured/?woman,smiling", imageHint: "woman smiling", rating: 5 },
+        { name: "Mary Wambui", title: "Vendor - Handcrafts", quote: "As a seller, this marketplace has helped me reach customers I never could before. The platform is easy to use and the community support is incredible.", image: "https://source.unsplash.com/featured/?woman,portrait", imageHint: "woman portrait", rating: 5 },
+        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://source.unsplash.com/featured/?man,smiling", imageHint: "man smiling", rating: 4.5 },
     ];
     try {
         const batch = writeBatch(db);

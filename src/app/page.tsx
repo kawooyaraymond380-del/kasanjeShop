@@ -14,7 +14,7 @@ function HeroSection() {
     <section className="relative text-white py-16 md:py-28">
       <div className="absolute inset-0">
         <Image
-          src="https://placehold.co/1280x853.png"
+          src="https://source.unsplash.com/featured/?market,africa"
           alt="Local market"
           data-ai-hint="local market"
           fill
