@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -10,12 +11,22 @@ import {
   ShoppingBasket,
   Menu,
   X,
+  User,
 } from 'lucide-react';
 import { CartDrawer } from './cart-drawer';
 import { useCart } from '@/hooks/use-cart';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const mainNavLinks = [
-  { title: 'Home', href: '#' },
+  { title: 'Home', href: '/' },
   { title: 'Categories', href: '#' },
   { title: 'Sell', href: '#' },
   { title: 'About', href: '#' },
@@ -24,13 +35,14 @@ const mainNavLinks = [
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartCount } = useCart();
+  const isAuthenticated = false; // Replace with actual auth check
   
   return (
     <header className="bg-card shadow-md sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <a href="#" className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-2">
               <Leaf className="h-7 w-7 text-primary" />
               <span className="font-bold text-xl font-headline">Kasanje.shop</span>
             </a>
@@ -41,7 +53,7 @@ export function SiteHeader() {
               {mainNavLinks.map((link) => (
                 <li key={link.title}>
                   <Button variant="link" asChild className="text-foreground/80 hover:text-primary p-0">
-                    <a href={link.href}>{link.title}</a>
+                    <Link href={link.href}>{link.title}</Link>
                   </Button>
                 </li>
               ))}
@@ -71,6 +83,32 @@ export function SiteHeader() {
                 </Button>
             </CartDrawer>
 
+            {isAuthenticated ? (
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">Toggle user menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild>
+                <Link href="/signin">Sign In</Link>
+              </Button>
+            )}
+
+
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
@@ -90,15 +128,22 @@ export function SiteHeader() {
                   <nav className="mb-8">
                     <ul className="flex flex-col gap-4 text-lg">
                       {mainNavLinks.map((link) => (
-                         <li key={link.title}><a href={link.href} className="block py-2 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>{link.title}</a></li>
+                         <li key={link.title}><Link href={link.href} className="block py-2 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>{link.title}</Link></li>
                       ))}
                     </ul>
                   </nav>
                   <div className="mt-auto">
-                    <div className="flex gap-4 mb-4">
-                      <Button className="flex-1">Sign In</Button>
-                      <Button variant="outline" className="flex-1">Sign Up</Button>
-                    </div>
+                    {isAuthenticated ? (
+                       <div className="flex flex-col gap-2">
+                          <Button asChild><Link href="/dashboard">Dashboard</Link></Button>
+                          <Button variant="outline">Logout</Button>
+                       </div>
+                    ) : (
+                      <div className="flex gap-4 mb-4">
+                        <Button className="flex-1" asChild><Link href="/signin">Sign In</Link></Button>
+                        <Button variant="outline" className="flex-1" asChild><Link href="/signup">Sign Up</Link></Button>
+                      </div>
+                    )}
                   </div>
               </SheetContent>
             </Sheet>
