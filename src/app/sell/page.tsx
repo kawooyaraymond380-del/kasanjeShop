@@ -26,19 +26,22 @@ const formSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
-  imageUrl: z.string().url('Please enter a valid URL').min(1, 'Image URL is required'),
+  imageUrl: z.string().url('Please enter a valid URL for the main image.'),
+  thumbnailUrl1: z.string().url('Please enter a valid URL or leave blank.').optional().or(z.literal('')),
+  thumbnailUrl2: z.string().url('Please enter a valid URL or leave blank.').optional().or(z.literal('')),
+  thumbnailUrl3: z.string().url('Please enter a valid URL or leave blank.').optional().or(z.literal('')),
 });
 
 type SellFormValues = z.infer<typeof formSchema>;
 
 // Helper function to convert Google Drive URL to a direct link
 const convertGoogleDriveUrl = (url: string): string => {
+    if (!url) return '';
     const regex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)\/view\?usp=sharing/;
     const match = url.match(regex);
     if (match && match[1]) {
         return `https://drive.google.com/uc?export=view&id=${match[1]}`;
     }
-    // Return the original URL if it doesn't match the expected format
     return url;
 }
 
@@ -79,6 +82,9 @@ export default function SellPage() {
       price: 0,
       category: '',
       imageUrl: '',
+      thumbnailUrl1: '',
+      thumbnailUrl2: '',
+      thumbnailUrl3: '',
     },
   });
 
@@ -122,6 +128,25 @@ export default function SellPage() {
       const imageHint = `${values.category.toLowerCase()} product`;
       const finalImageUrl = convertGoogleDriveUrl(values.imageUrl);
 
+      const thumbnails = [
+        values.thumbnailUrl1,
+        values.thumbnailUrl2,
+        values.thumbnailUrl3
+      ]
+      .filter(url => url) // Filter out empty strings
+      .map(url => ({
+          url: convertGoogleDriveUrl(url!),
+          hint: `${values.category.toLowerCase()} thumbnail`
+      }));
+
+      // Add the main image as the first thumbnail as well, for consistency in the detail view
+      thumbnails.unshift({ url: finalImageUrl, hint: imageHint });
+      // Ensure there are always 4 thumbnails, using placeholders if needed
+      while(thumbnails.length < 4) {
+          thumbnails.push({ url: 'https://placehold.co/600x400.png', hint: 'placeholder image' });
+      }
+
+
       await addDoc(collection(db, 'products'), {
         name: values.name,
         description: values.description,
@@ -129,6 +154,7 @@ export default function SellPage() {
         category: values.category,
         image: finalImageUrl,
         imageHint: imageHint,
+        thumbnails: thumbnails,
         sellerId: user.uid,
         sellerName: user.displayName || 'Anonymous',
         createdAt: new Date(),
@@ -262,7 +288,7 @@ export default function SellPage() {
                 name="imageUrl"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Product Image URL</FormLabel>
+                        <FormLabel>Main Product Image URL</FormLabel>
                         <FormControl>
                              <Input 
                                 type="url"
@@ -271,12 +297,55 @@ export default function SellPage() {
                              />
                         </FormControl>
                         <FormDescription>
-                            Paste a shareable Google Drive link for your product image.
+                            Paste a shareable Google Drive link for your main product image.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}
                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="thumbnailUrl1"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Thumbnail URL 1</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Optional" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="thumbnailUrl2"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Thumbnail URL 2</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Optional" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="thumbnailUrl3"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Thumbnail URL 3</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Optional" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Listing Product...</> : 'List Product'}
