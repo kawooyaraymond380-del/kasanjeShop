@@ -13,6 +13,17 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+// Helper function to convert Google Drive URL to a direct link
+const convertGoogleDriveUrl = (url: string): string => {
+    const regex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)\/view\?usp=sharing/;
+    const match = url.match(regex);
+    if (match && match[1]) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    // Return the original URL if it doesn't match the expected format
+    return url;
+}
+
 export default function DashboardPage() {
   const [user, loadingAuthState] = useAuthState(auth);
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,7 +43,7 @@ export default function DashboardPage() {
         // For a production app, you would add a where("sellerId", "==", user.uid) clause
         // to the getProducts function and create the necessary Firestore index.
         const allProducts = await getProducts();
-        const userProducts = allProducts.filter(p => p.sellerId === user.uid);
+        const userProducts = allProducts.filter(p => p.sellerId === user.uid).map(p => ({...p, image: convertGoogleDriveUrl(p.image)}));
         setProducts(userProducts);
       } catch (error) {
         console.error("Error fetching user products:", error);

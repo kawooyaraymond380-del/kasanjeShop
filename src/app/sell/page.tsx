@@ -12,7 +12,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,6 +30,17 @@ const formSchema = z.object({
 });
 
 type SellFormValues = z.infer<typeof formSchema>;
+
+// Helper function to convert Google Drive URL to a direct link
+const convertGoogleDriveUrl = (url: string): string => {
+    const regex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)\/view\?usp=sharing/;
+    const match = url.match(regex);
+    if (match && match[1]) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    // Return the original URL if it doesn't match the expected format
+    return url;
+}
 
 export default function SellPage() {
   const router = useRouter();
@@ -109,20 +120,21 @@ export default function SellPage() {
     
     try {
       const imageHint = `${values.category.toLowerCase()} product`;
+      const finalImageUrl = convertGoogleDriveUrl(values.imageUrl);
 
       await addDoc(collection(db, 'products'), {
         name: values.name,
         description: values.description,
         price: values.price,
         category: values.category,
-        image: values.imageUrl,
+        image: finalImageUrl,
         imageHint: imageHint,
         sellerId: user.uid,
         sellerName: user.displayName || 'Anonymous',
         createdAt: new Date(),
+        featured: false,
         rating: 0,
         reviews: 0,
-        featured: false,
       });
 
       toast({
@@ -254,10 +266,13 @@ export default function SellPage() {
                         <FormControl>
                              <Input 
                                 type="url"
-                                placeholder="https://..."
+                                placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
                                 {...field}
                              />
                         </FormControl>
+                        <FormDescription>
+                            Paste a shareable Google Drive link for your product image.
+                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}
