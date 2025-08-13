@@ -42,6 +42,7 @@ interface GetProductsOptions {
     category?: string;
     featured?: boolean;
     limit?: number;
+    sellerId?: string;
 }
 
 // Generic function to fetch products with different filters
@@ -56,7 +57,12 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
         if (options.featured) {
             constraints.push(where("featured", "==", true));
         }
+        if (options.sellerId) {
+            constraints.push(where("sellerId", "==", options.sellerId));
+        }
+        
         constraints.push(orderBy("createdAt", "desc"));
+
         if (options.limit) {
             constraints.push(limit(options.limit));
         }
@@ -174,7 +180,7 @@ async function seedTestimonials() {
     const testimonials: Omit<Testimonial, 'id'>[] = [
         { name: "Sarah Njeri", title: "Customer", quote: "Kasanje.shop has connected me with amazing local artisans. I love supporting my community while finding unique products that I can't get anywhere else.", image: "https://source.unsplash.com/featured/?woman,smiling", imageHint: "woman smiling", rating: 5 },
         { name: "Mary Wambui", title: "Vendor - Handcrafts", quote: "As a seller, this marketplace has helped me reach customers I never could before. The platform is easy to use and the community support is incredible.", image: "https://source.unsplash.com/featured/?woman,portrait", imageHint: "woman portrait", rating: 5 },
-        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://source.unsplash.com/featured/?man,smiling", imageHint: "man smiling", rating: 4.5 },
+        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now, I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://source.unsplash.com/featured/?man,smiling", imageHint: "man smiling", rating: 4.5 },
     ];
     try {
         const batch = writeBatch(db);
