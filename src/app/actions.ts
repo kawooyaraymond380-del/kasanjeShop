@@ -1,10 +1,11 @@
 
 "use server";
 
-import { productRecommendations, ProductRecommendationsInput, ProductRecommendationsOutput } from '@/ai/flows/product-recommendations';
-import { generateDescription, GenerateDescriptionInput, GenerateDescriptionOutput } from '@/ai/flows/generate-description';
+import { productRecommendations, ProductRecommendationsInput, ProductRecommendationsOutputSchema, ProductRecommendationsInputSchema } from '@/ai/flows/product-recommendations';
+import { generateDescription, GenerateDescriptionInput, GenerateDescriptionOutputSchema, GenerateDescriptionInputSchema } from '@/ai/flows/generate-description';
+import { z } from 'zod';
 
-export async function getAiRecommendations(input: ProductRecommendationsInput): Promise<ProductRecommendationsOutput> {
+export async function getAiRecommendations(input: z.infer<typeof ProductRecommendationsInputSchema>): Promise<z.infer<typeof ProductRecommendationsOutputSchema>> {
   try {
     const result = await productRecommendations(input);
     return result;
@@ -16,7 +17,7 @@ export async function getAiRecommendations(input: ProductRecommendationsInput): 
   }
 }
 
-export async function generateDescriptionAction(input: GenerateDescriptionInput): Promise<GenerateDescriptionOutput> {
+export async function generateDescriptionAction(input: z.infer<typeof GenerateDescriptionInputSchema>): Promise<z.infer<typeof GenerateDescriptionOutputSchema>> {
   try {
     const result = await generateDescription(input);
     return result;

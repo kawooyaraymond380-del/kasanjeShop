@@ -12,13 +12,13 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const ProductRecommendationsInputSchema = z.object({
+export const ProductRecommendationsInputSchema = z.object({
   browsingHistory: z.string().describe('The browsing history of the user.'),
   productCatalog: z.string().describe('A description of the available products in the catalog.'),
 });
 export type ProductRecommendationsInput = z.infer<typeof ProductRecommendationsInputSchema>;
 
-const ProductRecommendationsOutputSchema = z.object({
+export const ProductRecommendationsOutputSchema = z.object({
   recommendations: z.string().describe('A list of recommended products based on the browsing history.'),
 });
 export type ProductRecommendationsOutput = z.infer<typeof ProductRecommendationsOutputSchema>;
