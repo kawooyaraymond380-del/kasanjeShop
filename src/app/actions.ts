@@ -1,14 +1,15 @@
 
 "use server";
 
-import { productRecommendations, ProductRecommendationsInput, ProductRecommendationsOutputSchema, ProductRecommendationsInputSchema } from '@/ai/flows/product-recommendations';
-import { generateDescription, GenerateDescriptionInput, GenerateDescriptionOutputSchema, GenerateDescriptionInputSchema } from '@/ai/flows/generate-description';
+import { productRecommendations, type ProductRecommendationsInput, ProductRecommendationsOutputSchema, ProductRecommendationsInputSchema } from '@/ai/flows/product-recommendations';
+import { generateDescription, type GenerateDescriptionInput, GenerateDescriptionOutputSchema, GenerateDescriptionInputSchema } from '@/ai/flows/generate-description';
 import { z } from 'zod';
 
-export async function getAiRecommendations(input: z.infer<typeof ProductRecommendationsInputSchema>): Promise<z.infer<typeof ProductRecommendationsOutputSchema>> {
+export async function getAiRecommendations(input: ProductRecommendationsInput): Promise<z.infer<typeof ProductRecommendationsOutputSchema>> {
   try {
-    const result = await productRecommendations(input);
-    return result;
+    const validatedInput = ProductRecommendationsInputSchema.parse(input);
+    const result = await productRecommendations(validatedInput);
+    return ProductRecommendationsOutputSchema.parse(result);
   } catch (error) {
     console.error("Error in getAiRecommendations server action:", error);
     // In a real app, you might want to throw a more specific error
@@ -17,10 +18,11 @@ export async function getAiRecommendations(input: z.infer<typeof ProductRecommen
   }
 }
 
-export async function generateDescriptionAction(input: z.infer<typeof GenerateDescriptionInputSchema>): Promise<z.infer<typeof GenerateDescriptionOutputSchema>> {
+export async function generateDescriptionAction(input: GenerateDescriptionInput): Promise<z.infer<typeof GenerateDescriptionOutputSchema>> {
   try {
-    const result = await generateDescription(input);
-    return result;
+    const validatedInput = GenerateDescriptionInputSchema.parse(input);
+    const result = await generateDescription(validatedInput);
+    return GenerateDescriptionOutputSchema.parse(result);
   } catch (error) {
     console.error("Error in generateDescriptionAction server action:", error);
     throw new Error("Failed to generate product description.");
