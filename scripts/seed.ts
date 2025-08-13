@@ -50,6 +50,7 @@ const categories: Category[] = [
     { name: "Art & Prints", description: "Local artwork and designs", image: "https://source.unsplash.com/featured/?art,prints", imageHint: "art prints" },
     { name: "Clothing & Accessories", description: "Handcrafted wearable items", image: "https://source.unsplash.com/featured/?clothing,accessories", imageHint: "clothing accessories" },
     { name: "Workshops & Services", description: "Local skills and services", image: "https://source.unsplash.com/featured/?people,workshop", imageHint: "people workshop" },
+    { name: "Electronics", description: "Gadgets and devices", image: "https://source.unsplash.com/featured/?electronics,gadgets", imageHint: "electronics gadgets" },
 ];
 
 const testimonials: Testimonial[] = [

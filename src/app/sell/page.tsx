@@ -18,8 +18,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Wand2 } from 'lucide-react';
 import { getCategoriesFromDB, Category } from '@/lib/data';
+import { generateDescriptionAction } from '@/app/actions';
 
 const formSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
@@ -36,6 +37,7 @@ export default function SellPage() {
   const { toast } = useToast();
   const [user, loadingAuthState] = useAuthState(auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -69,6 +71,31 @@ export default function SellPage() {
       image: new File([], ''),
     },
   });
+
+  const handleGenerateDescription = async () => {
+    const productName = form.getValues('name');
+    if (!productName) {
+      form.setError('name', { type: 'manual', message: 'Please enter a product name first.' });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const result = await generateDescriptionAction({ productName });
+      form.setValue('description', result.description);
+      // Clear any previous error on the description field
+      form.clearErrors('description');
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Description Generation Failed',
+        description: 'Could not generate a description at this time. Please try again.',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const onSubmit = async (values: SellFormValues) => {
     if (!user) {
@@ -160,9 +187,25 @@ export default function SellPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Description</FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Product Description</FormLabel>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleGenerateDescription}
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Wand2 className="mr-2 h-4 w-4" />
+                        )}
+                        Generate with AI
+                      </Button>
+                    </div>
                     <FormControl>
-                      <Textarea placeholder="Describe your product in detail..." {...field} />
+                      <Textarea placeholder="Describe your product in detail, or let AI help you!" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,7 +239,7 @@ export default function SellPage() {
                             </FormControl>
                             <SelectContent>
                                 {categories.map(category => (
-                                    <SelectItem key={category.name} value={category.name}>{category.name}</SelectItem>
+                                    <SelectItem key={category.id || category.name} value={category.name}>{category.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
