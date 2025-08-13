@@ -2,6 +2,10 @@
 "use client";
 
 import { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -12,6 +16,8 @@ import {
   Menu,
   X,
   User,
+  LogOut,
+  LayoutDashboard,
 } from 'lucide-react';
 import { CartDrawer } from './cart-drawer';
 import { useCart } from '@/hooks/use-cart';
@@ -24,6 +30,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { useRouter } from 'next/navigation';
 
 const mainNavLinks = [
   { title: 'Home', href: '/' },
@@ -35,17 +43,28 @@ const mainNavLinks = [
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartCount } = useCart();
-  const isAuthenticated = false; // Replace with actual auth check
-  
+  const [user, loading, error] = useAuthState(auth);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('');
+  }
+
   return (
     <header className="bg-card shadow-md sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <a href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <Leaf className="h-7 w-7 text-primary" />
               <span className="font-bold text-xl font-headline">Kasanje.shop</span>
-            </a>
+            </Link>
           </div>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -83,23 +102,28 @@ export function SiteHeader() {
                 </Button>
             </CartDrawer>
 
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="h-10 w-20 animate-pulse bg-muted rounded-md" />
+            ) : user ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="icon" className="rounded-full">
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">Toggle user menu</span>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                     <Avatar className="h-8 w-8">
+                       <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                       <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user.displayName || 'My Account'}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link href="/dashboard">Dashboard</Link>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -133,15 +157,15 @@ export function SiteHeader() {
                     </ul>
                   </nav>
                   <div className="mt-auto">
-                    {isAuthenticated ? (
+                    {user ? (
                        <div className="flex flex-col gap-2">
-                          <Button asChild><Link href="/dashboard">Dashboard</Link></Button>
-                          <Button variant="outline">Logout</Button>
+                          <Button asChild onClick={() => setIsMobileMenuOpen(false)}><Link href="/dashboard">Dashboard</Link></Button>
+                          <Button variant="outline" onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}>Logout</Button>
                        </div>
                     ) : (
                       <div className="flex gap-4 mb-4">
-                        <Button className="flex-1" asChild><Link href="/signin">Sign In</Link></Button>
-                        <Button variant="outline" className="flex-1" asChild><Link href="/signup">Sign Up</Link></Button>
+                        <Button className="flex-1" asChild onClick={() => setIsMobileMenuOpen(false)}><Link href="/signin">Sign In</Link></Button>
+                        <Button variant="outline" className="flex-1" asChild onClick={() => setIsMobileMenuOpen(false)}><Link href="/signup">Sign Up</Link></Button>
                       </div>
                     )}
                   </div>

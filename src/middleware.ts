@@ -5,24 +5,12 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // These are the public paths that do not require authentication.
-  const publicPaths = ['/signin', '/signup', '/'];
-
-  // This is a placeholder for checking if the user is authenticated.
-  // In a real application, you would check for a valid session cookie or token.
-  const isAuthenticated = false; // Replace with actual auth check logic
-
-  // If the user is trying to access a protected route and is not authenticated,
-  // redirect them to the sign-in page.
-  if (!isAuthenticated && !publicPaths.some(p => pathname.startsWith(p) || pathname === p)) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
-  // If the user is authenticated and tries to access sign-in or sign-up,
-  // redirect them to the dashboard.
-  if (isAuthenticated && (pathname.startsWith('/signin') || pathname.startsWith('/signup'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
+  // The Firebase auth state is managed on the client, so the middleware
+  // doesn't have access to it. We will handle redirects on the client-side
+  // in the page components themselves.
+  
+  // For now, the middleware will just allow all requests to pass through.
+  // We can add more complex logic here later if needed (e.g., for API routes).
 
   return NextResponse.next();
 }
