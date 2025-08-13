@@ -56,7 +56,7 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
         }
         if (options.featured) {
             constraints.push(where("featured", "==", true));
-        } else {
+        } else if (!options.category) { // Only add orderBy if not filtering by category
              constraints.push(orderBy("createdAt", "desc"));
         }
         if (options.sellerId) {
