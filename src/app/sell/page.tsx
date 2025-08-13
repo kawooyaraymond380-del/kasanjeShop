@@ -127,6 +127,7 @@ export default function SellPage() {
         createdAt: new Date(),
         rating: 0,
         reviews: 0,
+        featured: false, // Ensure new products are not featured by default
       });
 
       toast({
