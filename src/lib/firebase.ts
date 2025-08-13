@@ -8,12 +8,12 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "TODO: YOUR API KEY",
-  authDomain: "TODO: YOUR AUTH DOMAIN",
-  projectId: "TODO: YOUR PROJECT ID",
-  storageBucket: "TODO: YOUR STORAGE BUCKET",
-  messagingSenderId: "TODO: YOUR MESSAGING SENDER ID",
-  appId: "TODO: YOUR APP ID"
+  "projectId": "kasanje-ai-market",
+  "appId": "1:155242261249:web:d423cc9a1ba3ddbb9dc900",
+  "storageBucket": "kasanje-ai-market.firebasestorage.app",
+  "apiKey": "AIzaSyDghBgLwFJuA6OzjeFwUL0Yvoqpeu_2dIs",
+  "authDomain": "kasanje-ai-market.firebaseapp.com",
+  "messagingSenderId": "155242261249"
 };
 
 // Initialize Firebase
