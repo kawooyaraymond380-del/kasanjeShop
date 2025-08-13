@@ -63,38 +63,42 @@ async function seedDatabase() {
     console.log("Starting database seed...");
 
     try {
-        const batch = writeBatch(db);
-
-        // Seed Categories
         const categoriesRef = collection(db, "categories");
-        // This will overwrite existing categories to ensure the list is always up-to-date.
-        // For a production app, you might want a more sophisticated migration strategy.
-        console.log("Seeding categories...");
+        console.log("Deleting existing categories...");
         const existingCategoriesSnap = await getDocs(categoriesRef);
-        existingCategoriesSnap.docs.forEach(doc => batch.delete(doc.ref));
-        await batch.commit(); // Commit the deletions first
-        
-        const newBatch = writeBatch(db);
+        let deleteBatch = writeBatch(db);
+        existingCategoriesSnap.docs.forEach(doc => {
+            deleteBatch.delete(doc.ref);
+        });
+        await deleteBatch.commit();
+        console.log("Existing categories deleted.");
+
+        console.log("Seeding new categories...");
+        let addBatch = writeBatch(db);
         categories.forEach(category => {
             const docRef = doc(categoriesRef);
-            newBatch.set(docRef, category);
+            addBatch.set(docRef, category);
         });
+        await addBatch.commit();
+        console.log("New categories seeded successfully.");
 
 
-        // Seed Testimonials
+        // Seed Testimonials only if the collection is empty
         const testimonialsRef = collection(db, "testimonials");
         const existingTestimonialsSnap = await getDocs(testimonialsRef);
         if (existingTestimonialsSnap.empty) {
             console.log("Seeding testimonials...");
+            let testimonialsBatch = writeBatch(db);
             testimonials.forEach(testimonial => {
                 const docRef = doc(testimonialsRef);
-                newBatch.set(docRef, testimonial);
+                testimonialsBatch.set(docRef, testimonial);
             });
+            await testimonialsBatch.commit();
+            console.log("Testimonials seeded successfully.");
         } else {
             console.log("Testimonials collection already contains data. Skipping seed.");
         }
 
-        await newBatch.commit();
         console.log("Database seeding completed successfully.");
 
     } catch (error) {
