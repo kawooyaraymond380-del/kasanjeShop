@@ -28,7 +28,7 @@ import {
 const mainNavLinks = [
   { title: 'Home', href: '/' },
   { title: 'Categories', href: '#' },
-  { title: 'Sell', href: '#' },
+  { title: 'Sell', href: '/sell' },
   { title: 'About', href: '#' },
 ];
 
