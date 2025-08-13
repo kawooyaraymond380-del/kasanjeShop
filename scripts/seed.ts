@@ -67,16 +67,19 @@ async function seedDatabase() {
 
         // Seed Categories
         const categoriesRef = collection(db, "categories");
+        // This will overwrite existing categories to ensure the list is always up-to-date.
+        // For a production app, you might want a more sophisticated migration strategy.
+        console.log("Seeding categories...");
         const existingCategoriesSnap = await getDocs(categoriesRef);
-        if (existingCategoriesSnap.empty) {
-            console.log("Seeding categories...");
-            categories.forEach(category => {
-                const docRef = doc(categoriesRef);
-                batch.set(docRef, category);
-            });
-        } else {
-            console.log("Categories collection already contains data. Skipping seed.");
-        }
+        existingCategoriesSnap.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit(); // Commit the deletions first
+        
+        const newBatch = writeBatch(db);
+        categories.forEach(category => {
+            const docRef = doc(categoriesRef);
+            newBatch.set(docRef, category);
+        });
+
 
         // Seed Testimonials
         const testimonialsRef = collection(db, "testimonials");
@@ -85,13 +88,13 @@ async function seedDatabase() {
             console.log("Seeding testimonials...");
             testimonials.forEach(testimonial => {
                 const docRef = doc(testimonialsRef);
-                batch.set(docRef, testimonial);
+                newBatch.set(docRef, testimonial);
             });
         } else {
             console.log("Testimonials collection already contains data. Skipping seed.");
         }
 
-        await batch.commit();
+        await newBatch.commit();
         console.log("Database seeding completed successfully.");
 
     } catch (error) {
