@@ -151,9 +151,9 @@ async function seedCategories() {
 
 async function seedTestimonials() {
     const testimonials: Omit<Testimonial, 'id'>[] = [
-        { name: "Sarah Njeri", title: "Customer", quote: "Kasanje.shop has connected me with amazing local artisans. I love supporting my community while finding unique products that I can't get anywhere else.", image: "https://placehold.co/100x100.png", imageHint: "woman smiling", rating: 5 },
-        { name: "Mary Wambui", title: "Vendor - Handcrafts", quote: "As a seller, this marketplace has helped me reach customers I never could before. The platform is easy to use and the community support is incredible.", image: "https://placehold.co/100x100.png", imageHint: "woman portrait", rating: 5 },
-        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://placehold.co/100x100.png", imageHint: "man smiling", rating: 4.5 },
+        { name: "Sarah Njeri", title: "Customer", quote: "Kasanje.shop has connected me with amazing local artisans. I love supporting my community while finding unique products that I can't get anywhere else.", image: "https://placehold.co/100x100.png", imageHint: "woman smiling" },
+        { name: "Mary Wambui", title: "Vendor - Handcrafts", quote: "As a seller, this marketplace has helped me reach customers I never could before. The platform is easy to use and the community support is incredible.", image: "https://placehold.co/100x100.png", imageHint: "woman portrait" },
+        { name: "John Kamau", title: "Vendor - Fresh Produce", quote: "I've been able to grow my small farm business thanks to Kasanje.shop. Now I can sell my fresh produce directly to customers who appreciate quality local food.", image: "https://placehold.co/100x100.png", imageHint: "man smiling" },
     ];
     try {
         const batch = writeBatch(db);
