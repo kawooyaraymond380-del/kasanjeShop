@@ -26,7 +26,7 @@ const formSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
-  image: z.instanceof(File).optional(), // Make image optional for now
+  image: z.any().optional(), // Image is now optional and will not be uploaded
 });
 
 type SellFormValues = z.infer<typeof formSchema>;
@@ -81,7 +81,6 @@ export default function SellPage() {
     try {
       const result = await generateDescriptionAction({ productName });
       form.setValue('description', result.description);
-      // Clear any previous error on the description field
       form.clearErrors('description');
     } catch (error) {
       console.error('Error generating description:', error);
@@ -252,7 +251,7 @@ export default function SellPage() {
                 name="image"
                 render={({ field: { onChange, value, ...rest } }) => (
                     <FormItem>
-                        <FormLabel>Product Image</FormLabel>
+                        <FormLabel>Product Image (will use placeholder)</FormLabel>
                         <FormControl>
                              <Input 
                                 type="file" 
