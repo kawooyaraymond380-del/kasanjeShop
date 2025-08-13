@@ -26,7 +26,7 @@ const formSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
-  image: z.any().optional(), // Image is now optional and will not be uploaded
+  imageUrl: z.string().url('Please enter a valid URL').min(1, 'Image URL is required'),
 });
 
 type SellFormValues = z.infer<typeof formSchema>;
@@ -67,6 +67,7 @@ export default function SellPage() {
       description: '',
       price: 0,
       category: '',
+      imageUrl: '',
     },
   });
 
@@ -107,8 +108,6 @@ export default function SellPage() {
     setIsSubmitting(true);
     
     try {
-      // Use a placeholder image instead of uploading to Firebase Storage
-      const imageUrl = `https://placehold.co/600x400.png`;
       const imageHint = `${values.category.toLowerCase()} product`;
 
       await addDoc(collection(db, 'products'), {
@@ -116,7 +115,7 @@ export default function SellPage() {
         description: values.description,
         price: values.price,
         category: values.category,
-        image: imageUrl,
+        image: values.imageUrl,
         imageHint: imageHint,
         sellerId: user.uid,
         sellerName: user.displayName || 'Anonymous',
@@ -128,7 +127,7 @@ export default function SellPage() {
 
       toast({
         title: 'Product Listed!',
-        description: 'Your product is now live on the marketplace with a placeholder image.',
+        description: 'Your product is now live on the marketplace.',
       });
 
       router.push('/dashboard');
@@ -248,16 +247,15 @@ export default function SellPage() {
 
               <FormField
                 control={form.control}
-                name="image"
-                render={({ field: { onChange, value, ...rest } }) => (
+                name="imageUrl"
+                render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Product Image (will use placeholder)</FormLabel>
+                        <FormLabel>Product Image URL</FormLabel>
                         <FormControl>
                              <Input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={(e) => onChange(e.target.files?.[0])}
-                                {...rest} 
+                                type="url"
+                                placeholder="https://..."
+                                {...field}
                              />
                         </FormControl>
                         <FormMessage />
