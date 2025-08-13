@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -43,7 +44,7 @@ export function ProductCard({ product, onSelect }: ProductCardProps) {
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-semibold text-lg">{product.name}</h3>
-          <span className="font-bold text-primary">KSH {product.price.toLocaleString()}</span>
+          <span className="font-bold text-primary">UGX {product.price.toLocaleString()}</span>
         </div>
         <p className="text-sm text-muted-foreground mb-2 h-10">{product.description}</p>
         <div className="flex items-center mb-3">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -60,7 +61,7 @@ export function ProductDetailDialog({ product, isOpen, onOpenChange }: ProductDe
               </div>
               <span className="text-sm text-muted-foreground">{product.reviews} reviews</span>
             </div>
-            <p className="text-2xl font-bold text-primary mb-4">KSH {product.price.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-primary mb-4">UGX {product.price.toLocaleString()}</p>
             <p className="text-foreground/80 mb-6">{product.description}</p>
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Details:</h3>

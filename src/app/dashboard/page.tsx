@@ -93,7 +93,7 @@ export default function DashboardPage() {
                     <TableCell>
                       <Badge variant="outline">{product.category}</Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">KSH {product.price.toLocaleString()}</TableCell>
+                    <TableCell className="hidden md:table-cell">UGX {product.price.toLocaleString()}</TableCell>
                     <TableCell className="hidden md:table-cell">{product.createdAt?.toLocaleDateString()}</TableCell>
                     <TableCell>
                        <div className="flex gap-2">

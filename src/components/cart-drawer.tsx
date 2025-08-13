@@ -39,7 +39,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        KSH {item.price.toLocaleString()}
+                        UGX {item.price.toLocaleString()}
                       </p>
                       <div className="mt-2 flex items-center justify-between">
                         <Input
@@ -68,7 +68,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                 <div className='w-full space-y-4'>
                     <div className="flex justify-between text-lg">
                         <span className="font-medium">Total:</span>
-                        <span className="font-bold">KSH {totalPrice.toLocaleString()}</span>
+                        <span className="font-bold">UGX {totalPrice.toLocaleString()}</span>
                     </div>
                     <Button size="lg" className="w-full">Proceed to Checkout</Button>
                     <Button variant="outline" className="w-full" onClick={clearCart}>Clear Cart</Button>

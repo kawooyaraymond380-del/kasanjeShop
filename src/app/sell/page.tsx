@@ -174,9 +174,9 @@ export default function SellPage() {
                     name="price"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Price (KSH)</FormLabel>
+                        <FormLabel>Price (UGX)</FormLabel>
                         <FormControl>
-                        <Input type="number" placeholder="e.g., 1500" {...field} />
+                        <Input type="number" placeholder="e.g., 50000" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
