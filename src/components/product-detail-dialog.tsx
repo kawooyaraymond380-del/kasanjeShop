@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,17 @@ interface ProductDetailDialogProps {
 
 export function ProductDetailDialog({ product, isOpen, onOpenChange }: ProductDetailDialogProps) {
   const [quantity, setQuantity] = useState(1);
-  const [mainImage, setMainImage] = useState(product?.image || '');
+  const [mainImage, setMainImage] = useState('');
   const { addToCart } = useCart();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (product?.image) {
+      setMainImage(product.image);
+      setQuantity(1);
+    }
+  }, [product]);
+
 
   if (!product) return null;
 
@@ -41,7 +49,7 @@ export function ProductDetailDialog({ product, isOpen, onOpenChange }: ProductDe
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
           <div>
             <div className="bg-muted rounded-lg mb-4 h-80 flex items-center justify-center overflow-hidden relative">
-              <Image src={mainImage} alt={product.name} fill className="object-contain" data-ai-hint={product.imageHint} />
+              {mainImage && <Image src={mainImage} alt={product.name} fill className="object-contain" data-ai-hint={product.imageHint} />}
             </div>
             <div className="grid grid-cols-4 gap-2">
               {product.thumbnails.map((thumb, index) => (
