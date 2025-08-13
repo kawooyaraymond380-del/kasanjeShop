@@ -56,12 +56,12 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
         }
         if (options.featured) {
             constraints.push(where("featured", "==", true));
+        } else {
+             constraints.push(orderBy("createdAt", "desc"));
         }
         if (options.sellerId) {
             constraints.push(where("sellerId", "==", options.sellerId));
         }
-        
-        constraints.push(orderBy("createdAt", "desc"));
 
         if (options.limit) {
             constraints.push(limit(options.limit));

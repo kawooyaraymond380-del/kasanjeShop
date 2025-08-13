@@ -3,12 +3,13 @@ import { collection, getDocs, query, limit, orderBy } from "firebase/firestore";
 import { db } from "./firebase";
 import { Product } from "./data";
 
-// This is the legacy function, we are keeping it for now
-// and exporting it from data.ts, but we should eventually
-// remove it.
+// This is a legacy function and should be removed.
+// The getProducts function in data.ts is more flexible.
 export async function getFeaturedProducts(): Promise<Product[]> {
+    console.warn("getFeaturedProducts is deprecated. Use getProducts({ featured: true }) instead.");
     try {
       const productsRef = collection(db, "products");
+      // This query might fail if the composite index is not created in Firestore.
       const q = query(productsRef, orderBy("createdAt", "desc"), limit(8));
       const querySnapshot = await getDocs(q);
       
