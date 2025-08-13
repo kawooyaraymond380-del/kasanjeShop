@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { getCategories } from '@/lib/data';
+import { getCategoriesFromDB, Category } from '@/lib/data';
 
 const formSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
@@ -36,7 +36,28 @@ export default function SellPage() {
   const { toast } = useToast();
   const [user, loadingAuthState] = useAuthState(auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const categories = getCategories();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const fetchedCategories = await getCategoriesFromDB();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Could not load categories',
+          description: 'There was a problem fetching product categories. Please try again later.'
+        })
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, [toast]);
+
 
   const form = useForm<SellFormValues>({
     resolver: zodResolver(formSchema),
@@ -100,7 +121,7 @@ export default function SellPage() {
     }
   };
 
-  if (loadingAuthState) {
+  if (loadingAuthState || loadingCategories) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
