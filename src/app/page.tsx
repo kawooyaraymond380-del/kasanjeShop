@@ -1,9 +1,9 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Star } from 'lucide-react';
-import { getCategoriesFromDB, getProducts, Testimonial, Category } from '@/lib/data';
+import { getCategoriesFromDB, getProducts, Testimonial, Category, NewsArticle, getNewsFromDB } from '@/lib/data';
 import { ProductGrid } from '@/components/product-grid';
 import { AiRecommendations } from '@/components/ai-recommendations';
 import { Suspense } from 'react';
@@ -77,7 +77,7 @@ async function CategoriesSection() {
 }
 
 async function FeaturedProductsSection() {
-  const products = await getProducts({ featured: true });
+  const products = await getProducts({ featured: true, limit: 8 });
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
@@ -160,7 +160,7 @@ async function TestimonialsSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.name} className="bg-background p-6">
+            <Card key={testimonial.id} className="bg-background p-6">
               <div className="flex text-yellow-500 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className={`w-5 h-5 ${i < testimonial.rating ? 'fill-current' : ''}`} />
@@ -183,6 +183,40 @@ async function TestimonialsSection() {
     </section>
   );
 }
+
+async function NewsSection() {
+  const news = await getNewsFromDB();
+  return (
+    <section className="py-16 bg-background">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">News in Kasanje</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Stay up to date with the latest happenings in our community.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {news.map((article) => (
+            <Card key={article.id} className="overflow-hidden flex flex-col">
+                <div className="relative h-56">
+                     <Image src={article.image} alt={article.title} fill className="object-cover" data-ai-hint={article.imageHint} />
+                </div>
+              <CardContent className="p-6 flex flex-col flex-grow">
+                 <p className="text-sm text-muted-foreground mb-2">{new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <h3 className="font-bold text-xl mb-3">{article.title}</h3>
+                <p className="text-foreground/80 mb-4 flex-grow">{article.summary}</p>
+                <Button asChild variant="secondary" className="mt-auto self-start">
+                    <Link href={article.link}>Read More</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function CategoriesSkeleton() {
   return (
@@ -239,6 +273,33 @@ function TestimonialsSkeleton() {
   )
 }
 
+function NewsSkeleton() {
+    return (
+      <section className="py-16 bg-background">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <Skeleton className="h-8 w-64 mx-auto mb-4" />
+          <Skeleton className="h-4 w-96 mx-auto" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="h-56" />
+              <CardContent className="p-6">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-6 w-3/4 mb-3" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Skeleton className="h-10 w-28" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+    )
+}
+
 
 export default function Home() {
   return (
@@ -253,6 +314,9 @@ export default function Home() {
       <CommunityBanner />
       <Suspense fallback={<TestimonialsSkeleton />}>
         <TestimonialsSection />
+      </Suspense>
+      <Suspense fallback={<NewsSkeleton />}>
+        <NewsSection />
       </Suspense>
     </>
   );

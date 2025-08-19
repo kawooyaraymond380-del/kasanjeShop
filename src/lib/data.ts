@@ -38,6 +38,16 @@ export interface Testimonial {
   rating: number;
 }
 
+export interface NewsArticle {
+    id?: string;
+    title: string;
+    summary: string;
+    image: string;
+    imageHint: string;
+    date: string;
+    link: string;
+}
+
 interface GetProductsOptions {
     category?: string;
     featured?: boolean;
@@ -56,7 +66,11 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
         }
         if (options.featured) {
             constraints.push(where("featured", "==", true));
-        } else if (!options.category) { // Only add orderBy if not filtering by category
+        } else if (options.category) { 
+            // no-op, don't add order by when filtering by category
+            // to avoid needing a composite index
+        }
+        else {
              constraints.push(orderBy("createdAt", "desc"));
         }
         if (options.sellerId) {
@@ -152,6 +166,25 @@ export async function getTestimonialsFromDB(): Promise<Testimonial[]> {
     }
 }
 
+export async function getNewsFromDB(): Promise<NewsArticle[]> {
+    const newsRef = collection(db, "news");
+    try {
+        const querySnapshot = await getDocs(query(newsRef, orderBy("date", "desc")));
+        
+        if (querySnapshot.empty) {
+            console.log("News collection is empty. Seeding data...");
+            await seedNews();
+            const newSnapshot = await getDocs(query(newsRef, orderBy("date", "desc")));
+            return newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsArticle));
+        }
+        
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsArticle));
+    } catch (error) {
+        console.error("Error fetching news:", error);
+        return [];
+    }
+}
+
 async function seedCategories() {
     const categories: Omit<Category, 'id'>[] = [
         { name: "Handmade Crafts", description: "Unique artisan creations", image: "https://source.unsplash.com/featured/?handmade,crafts", imageHint: "handmade crafts" },
@@ -195,6 +228,48 @@ async function seedTestimonials() {
         console.log("Testimonials seeded successfully.");
     } catch (error) {
         console.error("Error seeding testimonials:", error);
+    }
+}
+
+async function seedNews() {
+    const newsArticles: Omit<NewsArticle, 'id'>[] = [
+        { 
+            title: "New Community Center Opens", 
+            summary: "The new community center officially opened its doors today, offering a range of services and workshops for all ages.",
+            image: "https://source.unsplash.com/featured/?community,center",
+            imageHint: "community center",
+            date: "2024-08-15",
+            link: "#"
+        },
+        { 
+            title: "Local Farmer's Market a Huge Success", 
+            summary: "This weekend's farmer's market saw a record turnout, with vendors selling out of fresh produce and handmade goods.",
+            image: "https://source.unsplash.com/featured/?farmers,market",
+            imageHint: "farmers market",
+            date: "2024-08-12",
+            link: "#"
+        },
+        { 
+            title: "Youth Soccer Tournament Announced", 
+            summary: "Registration is now open for the annual Kasanje youth soccer tournament, scheduled for next month.",
+            image: "https://source.unsplash.com/featured/?youth,soccer",
+            imageHint: "youth soccer",
+            date: "2024-08-10",
+            link: "#"
+        },
+    ];
+    try {
+        const batch = writeBatch(db);
+        const newsRef = collection(db, "news");
+        console.log("Seeding news...");
+        newsArticles.forEach(article => {
+            const docRef = doc(newsRef);
+            batch.set(docRef, article);
+        });
+        await batch.commit();
+        console.log("News seeded successfully.");
+    } catch (error) {
+        console.error("Error seeding news:", error);
     }
 }
 
