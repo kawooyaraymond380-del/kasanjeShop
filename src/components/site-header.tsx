@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   Leaf,
   Search,
@@ -140,15 +140,15 @@ export function SiteHeader() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-4/5 max-w-xs p-5 flex flex-col bg-card">
-                 <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-2">
+                 <SheetHeader className="flex flex-row justify-between items-center mb-8 text-left">
+                    <SheetTitle className="flex items-center gap-2">
                       <Leaf className="h-7 w-7 text-primary" />
                       <span className="font-bold text-xl font-headline">Kasanje.shop</span>
-                    </div>
+                    </SheetTitle>
                     <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
                       <X className="h-6 w-6" />
                     </Button>
-                  </div>
+                  </SheetHeader>
                   <nav className="mb-8">
                     <ul className="flex flex-col gap-4 text-lg">
                       {mainNavLinks.map((link) => (
